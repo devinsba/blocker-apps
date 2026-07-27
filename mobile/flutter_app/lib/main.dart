@@ -11,14 +11,14 @@ class BlockerApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: AppStrings.appTitle,
+      title: AppStrings.mobileTitle,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
         useMaterial3: true,
       ),
       home: const Scaffold(
         body: Center(
-          child: Text(AppStrings.mobileSkeletonText),
+          child: Text(AppStrings.mobileHomeText),
         ),
       ),
     );
