@@ -16,8 +16,8 @@ class BlockerApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
         useMaterial3: true,
       ),
-      home: const Scaffold(
-        body: Center(
+      home: Scaffold(
+        body: const Center(
           child: Text(AppStrings.mobileHomeText),
         ),
       ),

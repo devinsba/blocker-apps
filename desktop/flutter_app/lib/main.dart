@@ -16,8 +16,8 @@ class DesktopBlockerApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueGrey),
         useMaterial3: true,
       ),
-      home: const Scaffold(
-        body: Center(
+      home: Scaffold(
+        body: const Center(
           child: Text(AppStrings.desktopHomeText),
         ),
       ),
