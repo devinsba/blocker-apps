@@ -2,7 +2,8 @@
 class AppStrings {
   AppStrings._();
 
-  static const mobileTitle = 'Blocker Apps';
+  static const appTitle = 'Blocker Apps';
   static const mobileSkeletonText = 'Blocker Apps Skeleton';
-  static const desktopSkeletonText = 'Blocker Apps Desktop Skeleton';
+  static const desktopTitle = 'Blocker Apps Desktop';
+  static const desktopSkeletonText = '$desktopTitle Skeleton';
 }
