@@ -5,5 +5,4 @@ class AppStrings {
   static const appTitle = 'Blocker Apps';
   static const mobileSkeletonText = 'Blocker Apps Skeleton';
   static const desktopTitle = 'Blocker Apps Desktop Skeleton';
-  static const desktopSkeletonText = desktopTitle;
 }

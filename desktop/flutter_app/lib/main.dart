@@ -18,7 +18,7 @@ class DesktopBlockerApp extends StatelessWidget {
       ),
       home: const Scaffold(
         body: Center(
-          child: Text(AppStrings.desktopSkeletonText),
+          child: Text(AppStrings.desktopTitle),
         ),
       ),
     );
