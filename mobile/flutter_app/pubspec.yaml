@@ -9,6 +9,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  blocker_shared:
+    path: ../../shared/blocker_shared
 
 dev_dependencies:
   flutter_test:

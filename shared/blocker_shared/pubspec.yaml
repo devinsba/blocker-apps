@@ -1,0 +1,7 @@
+name: blocker_shared
+description: Shared module for common code used by mobile and desktop apps.
+publish_to: "none"
+version: 0.1.0
+
+environment:
+  sdk: ">=3.3.0 <4.0.0"

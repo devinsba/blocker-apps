@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:blocker_shared/blocker_shared.dart';
 
 void main() {
   runApp(const BlockerApp());
@@ -10,14 +11,14 @@ class BlockerApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Blocker Apps',
+      title: AppStrings.mobileTitle,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.indigo),
         useMaterial3: true,
       ),
       home: const Scaffold(
         body: Center(
-          child: Text('Blocker Apps Skeleton'),
+          child: Text(AppStrings.mobileSkeletonText),
         ),
       ),
     );

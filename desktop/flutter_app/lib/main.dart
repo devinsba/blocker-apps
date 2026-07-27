@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:blocker_shared/blocker_shared.dart';
 
 void main() {
   runApp(const DesktopBlockerApp());
@@ -10,14 +11,14 @@ class DesktopBlockerApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Blocker Apps Desktop Skeleton',
+      title: AppStrings.desktopTitle,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueGrey),
         useMaterial3: true,
       ),
       home: const Scaffold(
         body: Center(
-          child: Text('Blocker Apps Desktop Skeleton'),
+          child: Text(AppStrings.desktopSkeletonText),
         ),
       ),
     );

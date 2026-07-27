@@ -4,6 +4,7 @@ Multi-platform app skeleton:
 
 - `mobile/flutter_app`: Flutter app skeleton for iOS, Android, and iPadOS.
 - `desktop/flutter_app`: Flutter app skeleton for macOS and Windows.
+- `shared/blocker_shared`: Shared Dart module for common code used by both apps.
 
 ## Mobile Flutter app
 
