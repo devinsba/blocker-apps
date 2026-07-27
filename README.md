@@ -13,6 +13,7 @@ Next step (when Flutter SDK is available):
 
 ```bash
 cd mobile/flutter_app
+flutter create --platforms=android,ios .
 flutter pub get
 flutter run
 ```
@@ -25,6 +26,7 @@ Next step (when Flutter SDK is available):
 
 ```bash
 cd desktop/flutter_app
+flutter create --platforms=macos,windows .
 flutter pub get
 flutter run -d macos
 ```
