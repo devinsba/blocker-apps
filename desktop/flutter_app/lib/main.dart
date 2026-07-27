@@ -10,7 +10,7 @@ class DesktopBlockerApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Blocker Apps Desktop',
+      title: 'Blocker Apps Desktop Skeleton',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueGrey),
         useMaterial3: true,
