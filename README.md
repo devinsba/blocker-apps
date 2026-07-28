@@ -12,9 +12,11 @@ Path: `mobile/flutter_app`
 
 Next step (when Flutter SDK is available):
 
+> ⚠️ `flutter create --overwrite` may overwrite existing files in this directory.
+
 ```bash
 cd mobile/flutter_app
-flutter create --platforms=android,ios .
+flutter create --platforms=android,ios --overwrite .
 flutter pub get
 flutter run
 ```
@@ -25,9 +27,11 @@ Path: `desktop/flutter_app`
 
 Next step (when Flutter SDK is available):
 
+> ⚠️ `flutter create --overwrite` may overwrite existing files in this directory.
+
 ```bash
 cd desktop/flutter_app
-flutter create --platforms=macos,windows .
+flutter create --platforms=macos,windows --overwrite .
 flutter pub get
 flutter run -d macos
 ```
