@@ -300,7 +300,7 @@ Screen Time APIs provide app-level blocking and monitoring capabilities introduc
 - **Shielding**: Shows overlay on app, allows launch with restriction UI
 
 ### Known Challenges
-- APIs described as "very finnicky"
+- APIs described as "very finicky"
 - Minimal official Apple documentation
 - Requires careful configuration of App Groups for persistence
 - Half-baked documentation ("solving a puzzle with half the pieces missing")
@@ -566,7 +566,7 @@ Distribution:
 - Crashes are hard to diagnose
 
 **Screen Time APIs Debugging**:
-- Described as "very finnicky"
+- Described as "very finicky"
 - Minimal official documentation
 - Community relies on trial and error
 - Many edge cases and unexpected behaviors

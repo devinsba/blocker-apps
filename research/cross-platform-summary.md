@@ -44,7 +44,7 @@
 - Apple apps bypass VPN (Maps, APNs, iCloud, etc.)
 - App Store approval risk for VPN approach
 - Higher battery impact from VPN tunnel
-- "Finnicky" Screen Time APIs with minimal documentation
+- "Finicky" Screen Time APIs with minimal documentation
 
 **Best For**: Consumer focus apps, parental controls, productivity apps
 
@@ -250,7 +250,7 @@ Platform-Specific Layer:
 **Affects**: All Network Extension approaches
 
 #### 7. Screen Time API Documentation
-**What**: "Finnicky" APIs with minimal official documentation
+**What**: "Finicky" APIs with minimal official documentation
 **Impact**: Trial and error development, unexpected behaviors, easy to misconfigure
 **Workaround**: Community resources, extensive testing, proper App Groups configuration
 **Affects**: FamilyControls, ManagedSettings, DeviceActivity

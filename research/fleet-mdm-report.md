@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-Fleet is an open-source, cross-platform device management (MDM) solution that supports iOS, Android, macOS, Windows, Linux, and ChromeOS. It's the **only verified, production-ready open-source MDM** that covers all platforms needed for the blocker app project. Fleet is built on osquery, nanoMDM, Nudge, and swiftDialog, offering GitOps-enabled MDM under an MIT license (core features).
+Fleet is an open-source, cross-platform device management (MDM) solution that supports iOS, Android, macOS, Windows, Linux, and ChromeOS. It's a production-ready open-source MDM option that covers the platforms needed for the blocker app project. Fleet is built on osquery, nanoMDM, Nudge, and swiftDialog, offering GitOps-enabled MDM under an MIT license (core features).
 
 **Key Verdict for Blocker App Project**: ✅ **Recommended** - Best available option for testing supervision features and enterprise deployment prototyping.
 
@@ -20,11 +20,11 @@ Fleet is a device management platform that combines:
 
 ### Project Status
 
-- **GitHub**: github.com/fleetdm/fleet (verified, 2.7k+ stars)
+- **GitHub**: github.com/fleetdm/fleet
 - **License**: Majority MIT (open-source core), Premium features under separate license
-- **Development**: Very active (daily commits as of 2025)
-- **Maturity**: Production-ready, used by Netflix, Stripe, Fastly, Uber
-- **Scale**: Deployments from dozens to 400,000+ hosts
+- **Development**: Active open-source development
+- **Maturity**: Positioned for production use, including enterprise deployment workflows
+- **Scale**: Intended for both small-fleet and large-fleet device management
 
 ---
 
