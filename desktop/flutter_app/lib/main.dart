@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:blocker_shared/blocker_shared.dart';
+import 'screens/home_screen.dart';
 
 void main() {
   runApp(const DesktopBlockerApp());
@@ -16,11 +17,7 @@ class DesktopBlockerApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueGrey),
         useMaterial3: true,
       ),
-      home: Scaffold(
-        body: const Center(
-          child: Text(AppStrings.desktopHomeText),
-        ),
-      ),
+      home: const HomeScreen(),
     );
   }
 }
