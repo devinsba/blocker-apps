@@ -1,5 +1,10 @@
 # blocker-apps
 
+> **macOS blocker (Rust):** [`blocker-rs/`](blocker-rs/README.md) is a content
+> filter system extension, CLI/daemon, and central signed-blocklist server.
+> It blocks websites and apps while coexisting with Tailscale, Twingate and
+> other VPNs, and scales to millions of blocked domains.
+
 Multi-platform app skeleton:
 
 - `mobile/flutter_app`: Flutter app skeleton for iOS, Android, and iPadOS.

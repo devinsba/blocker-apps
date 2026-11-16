@@ -1,0 +1,25 @@
+[package]
+name = "blocker-core"
+description = "Platform-independent blocking decisions: rules, schedules, domain sets, SNI parsing"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+anyhow = "1"
+base64 = "0.22"
+chrono = { version = "0.4", default-features = false, features = ["clock", "serde", "std"] }
+ed25519-dalek = { version = "2", features = ["rand_core"] }
+fst = "0.4"
+hex = "0.4"
+idna = "1"
+ipnet = { version = "2", features = ["serde"] }
+memmap2 = "0.9"
+rand = "0.8"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha2 = "0.10"
+toml = "0.8"
+
+[dev-dependencies]
+tempfile = "3"

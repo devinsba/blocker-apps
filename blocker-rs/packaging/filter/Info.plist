@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>en</string>
+	<key>CFBundleExecutable</key>
+	<string>dev.blocker.app.filter</string>
+	<key>CFBundleIdentifier</key>
+	<string>dev.blocker.app.filter</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>Blocker Filter</string>
+	<key>CFBundlePackageType</key>
+	<string>SYSX</string>
+	<key>CFBundleShortVersionString</key>
+	<string>__VERSION__</string>
+	<key>CFBundleVersion</key>
+	<string>__VERSION__</string>
+	<key>LSMinimumSystemVersion</key>
+	<string>12.0</string>
+	<key>NSSystemExtensionUsageDescription</key>
+	<string>Blocker filters network connections to enforce your website and app blocking rules.</string>
+	<key>NetworkExtension</key>
+	<dict>
+		<key>NEProviderClasses</key>
+		<dict>
+			<key>com.apple.networkextension.filter-data</key>
+			<string>BlockerFilterDataProvider</string>
+		</dict>
+		<key>NEMachServiceName</key>
+		<string>__TEAM_ID__.dev.blocker.app.filter</string>
+	</dict>
+</dict>
+</plist>

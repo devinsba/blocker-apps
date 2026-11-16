@@ -1,0 +1,27 @@
+[package]
+name = "blocker"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+anyhow = "1.0.104"
+block2 = "0.6"
+blocker-core = { path = "../blocker-core" }
+chrono = "0.4.45"
+clap = { version = "4", features = ["derive", "env"] }
+dispatch2 = "0.3"
+env_logger = "0.11.11"
+libc = "0.2.191"
+log = "0.4"
+objc2 = "0.6"
+objc2-foundation = "0.3"
+objc2-network-extension = "0.3"
+objc2-system-extensions = "0.3"
+plist = "1.10.3"
+serde_json = "1.0.154"
+sysinfo = "0.40.3"
+ureq = "2"
+
+[dev-dependencies]
+tempfile = "3.27.0"
