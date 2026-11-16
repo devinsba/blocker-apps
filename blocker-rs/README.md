@@ -70,8 +70,39 @@ Blocker takes neither slot:
 | `blocker-filter` | The `NEFilterDataProvider` system extension (`BlockerFilterDataProvider`), written in Rust with `objc2`. Hot-reloads the engine when the config or lists change. |
 | `blocker` | CLI and root daemon, shipped as `Blocker.app/Contents/MacOS/blocker`: rules, server, updates, app enforcement, extension activation, launchd install. |
 | `blocker-server` | Central list server: `keygen`, `build` (fetch → parse → FST → signed manifest, with degraded-list protection), `serve`. |
+| `blocker-ui` | Menu-bar app built with [Rune](https://github.com/anomalyco/rune): a tray icon showing whether blocking is active, and a window with rules, blocklists and daemon/filter health. Bundle's main executable. |
+
+## Menu-bar app
+
+The tray icon is a template SF Symbol that follows the menu bar's appearance:
+
+| Icon | Meaning |
+|---|---|
+| `shield.fill` | Blocking: at least one rule is active right now (menu lists them) |
+| `shield` | Not blocking: no rule is active |
+| `exclamationmark.shield.fill` | Needs attention: config error, or rules active while the filter is off or awaiting approval |
+
+The window (Open Blocker… in the tray menu) is a Rune view styled with
+rune-kit. Its switches enable or disable rules, and Update now fetches lists;
+both run the CLI through the macOS administrator prompt. A locked rule's
+switch stays disabled while the rule is active. The app reads the config
+directory directly and asks the signed CLI for daemon and filter state
+(`blocker status --json`), so it needs no privileges of its own.
+
+On Windows and Linux the tray is Rune's own `rune::Tray`, with a drawn icon
+(green dot, grey ring, amber "!"). Rune's tray can't change its icon, so a
+state change replaces it. Rune's tray doesn't support macOS yet, so there the
+tray is an `NSStatusItem` driven from Rune's main thread through
+`AppHandle::update`. Headless runs
+(`blocker-ui --snap ui.png --scene blocking|idle|attention`) skip the tray.
+`BLOCKER_UI_TRACE=1` logs every icon and menu change.
 
 ## Using it
+
+Launching `Blocker.app` starts the menu-bar UI: the tray icon shows whether
+blocking is active, and its window shows rules, lists and daemon/filter status.
+Changes prompt for an admin password. The CLI lives at
+`Blocker.app/Contents/MacOS/blocker`:
 
 ```bash
 # Server side (once): generate the signing key, build, serve.

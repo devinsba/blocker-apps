@@ -13,6 +13,7 @@ pub mod lists;
 pub mod manifest;
 pub mod schedule;
 pub mod sni;
+pub mod status;
 pub mod store;
 
 pub use config::Config;

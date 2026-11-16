@@ -10,7 +10,7 @@ Usage:
                [--notarize-profile <notarytool keychain profile>] [--out dist]
   build-app.sh --adhoc [--team-id XXXXXXXXXX] [--out dist]
 
---bin-dir DIR skips cargo and takes blocker + blocker-filter from DIR.
+--bin-dir DIR skips cargo and takes blocker, blocker-filter and blocker-ui from DIR.
 --adhoc signs with "-" and embeds no provisioning profiles (structure testing
 only; the system extension will not activate unless SIP/developer mode is off).
 USAGE
@@ -68,7 +68,7 @@ if [[ -n $BIN_DIR ]]; then
   TARGET_DIR="$BIN_DIR"
 else
   echo "==> Building release binaries"
-  (cd "$ROOT" && cargo build --release -p blocker -p blocker-filter)
+  (cd "$ROOT" && cargo build --release -p blocker -p blocker-filter -p blocker-ui)
   TARGET_DIR="${CARGO_TARGET_DIR:-$ROOT/target}/release"
 fi
 
@@ -78,7 +78,8 @@ rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$EXT/Contents/MacOS"
 
 echo "==> Assembling bundle"
-cp "$TARGET_DIR/blocker" "$APP/Contents/MacOS/blocker"
+cp "$TARGET_DIR/blocker-ui" "$APP/Contents/MacOS/blocker-ui"   # main executable (menu-bar UI)
+cp "$TARGET_DIR/blocker" "$APP/Contents/MacOS/blocker"         # CLI
 cp "$TARGET_DIR/blocker-filter" "$EXT/Contents/MacOS/dev.blocker.app.filter"
 
 subst() { # subst <template> <dest>
@@ -101,7 +102,8 @@ if [[ $ADHOC -eq 0 ]]; then
   cp "$FILTER_PROFILE" "$EXT/Contents/embedded.provisionprofile"
 fi
 
-# Sign inside-out: extension first, then the app that contains it.
+# Sign inside-out: extension, then the CLI helper, then the app (whose main
+# executable, blocker-ui, is signed as part of the bundle).
 echo "==> Signing"
 if [[ $ADHOC -eq 1 ]]; then
   TS_FLAG=(--timestamp=none)
@@ -110,8 +112,19 @@ else
 fi
 codesign --force --options runtime "${TS_FLAG[@]}" \
   --entitlements "$WORK/filter.entitlements" -s "$IDENTITY" "$EXT"
+# macOS kills any executable whose signature claims restricted entitlements
+# (Network Extension, system extension install, app groups) unless an
+# embedded provisioning profile grants them. Ad-hoc builds have no profile,
+# so their UI and CLI are signed without entitlements: they run locally, and
+# filter activation fails with a clear "code signature invalid" error.
+APP_ENT=(--entitlements "$WORK/app.entitlements")
+if [[ $ADHOC -eq 1 ]]; then
+  APP_ENT=()
+fi
+codesign --force --options runtime "${TS_FLAG[@]}" --identifier dev.blocker.cli \
+  ${APP_ENT[@]+"${APP_ENT[@]}"} -s "$IDENTITY" "$APP/Contents/MacOS/blocker"
 codesign --force --options runtime "${TS_FLAG[@]}" \
-  --entitlements "$WORK/app.entitlements" -s "$IDENTITY" "$APP"
+  ${APP_ENT[@]+"${APP_ENT[@]}"} -s "$IDENTITY" "$APP"
 
 echo "==> Verifying"
 codesign --verify --deep --strict --verbose=2 "$APP"

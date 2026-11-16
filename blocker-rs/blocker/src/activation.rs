@@ -35,6 +35,8 @@ const DESCRIPTION: &str = "Blocker";
 /// The request stays pending in System Settings; re-running picks it up.
 const APPROVAL_TIMEOUT: Duration = Duration::from_secs(300);
 const PREFS_TIMEOUT: Duration = Duration::from_secs(30);
+/// Shorter waits for `status()`, which a UI polls.
+const STATUS_TIMEOUT: Duration = Duration::from_secs(3);
 
 #[derive(Debug)]
 enum Event {
@@ -229,11 +231,20 @@ pub fn deactivate() -> Result<()> {
 }
 
 pub fn status() -> Result<FilterStatus> {
+    status_with_timeout(PREFS_TIMEOUT)
+}
+
+/// Like [`status`] but gives up quickly; for machine-readable polling.
+pub fn status_quick() -> Result<FilterStatus> {
+    status_with_timeout(STATUS_TIMEOUT)
+}
+
+fn status_with_timeout(timeout: Duration) -> Result<FilterStatus> {
     // SAFETY: constructor with a valid identifier and queue.
     let (rx, _delegate) = submit(|id, q| unsafe {
         OSSystemExtensionRequest::propertiesRequestForExtension_queue(id, q)
     });
-    let extensions = match rx.recv_timeout(PREFS_TIMEOUT) {
+    let extensions = match rx.recv_timeout(timeout) {
         Ok(Event::Properties(p)) => Some(p),
         Ok(Event::Failed(e)) => {
             log::debug!("properties request failed: {e}");
@@ -241,7 +252,7 @@ pub fn status() -> Result<FilterStatus> {
         }
         _ => None,
     };
-    let manager = load_manager()?;
+    let manager = load_manager(timeout)?;
     // SAFETY: plain property getters.
     let (configured, enabled) = unsafe {
         (
@@ -259,6 +270,7 @@ pub fn status() -> Result<FilterStatus> {
 /// Waits for an `NEFilterManager` completion handler.
 fn wait_prefs(
     what: &str,
+    timeout: Duration,
     start: impl FnOnce(&block2::DynBlock<dyn Fn(*mut NSError)>),
 ) -> Result<()> {
     let (tx, rx) = mpsc::channel::<Option<String>>();
@@ -268,14 +280,14 @@ fn wait_prefs(
         let _ = tx.send(msg);
     });
     start(&block);
-    match rx.recv_timeout(PREFS_TIMEOUT) {
+    match rx.recv_timeout(timeout) {
         Ok(None) => Ok(()),
         Ok(Some(e)) => Err(anyhow!("{what}: {e}")),
         Err(_) => bail!("{what}: timed out"),
     }
 }
 
-fn load_manager() -> Result<Retained<NEFilterManager>> {
+fn load_manager(timeout: Duration) -> Result<Retained<NEFilterManager>> {
     // `+sharedManager` returns nil when the process lacks the content-filter
     // entitlement (e.g. the CLI run from outside Blocker.app); the generated
     // binding would panic on that, so message it directly.
@@ -283,15 +295,15 @@ fn load_manager() -> Result<Retained<NEFilterManager>> {
     let manager: Option<Retained<NEFilterManager>> =
         unsafe { msg_send![NEFilterManager::class(), sharedManager] };
     let manager = manager.context("content filter unavailable: run the signed /Applications/Blocker.app/Contents/MacOS/blocker")?;
-    wait_prefs("loading filter preferences", |b| unsafe {
+    wait_prefs("loading filter preferences", timeout, |b| unsafe {
         manager.loadFromPreferencesWithCompletionHandler(b)
     })?;
     Ok(manager)
 }
 
 fn configure_filter(enable: bool) -> Result<()> {
-    let manager =
-        load_manager().context("is Blocker.app installed in /Applications and signed?")?;
+    let manager = load_manager(PREFS_TIMEOUT)
+        .context("is Blocker.app installed in /Applications and signed?")?;
     // SAFETY: configuring a freshly loaded manager from one thread.
     unsafe {
         if enable {
@@ -307,7 +319,7 @@ fn configure_filter(enable: bool) -> Result<()> {
         }
         manager.setEnabled(enable);
     }
-    wait_prefs("saving filter preferences", |b| unsafe {
+    wait_prefs("saving filter preferences", PREFS_TIMEOUT, |b| unsafe {
         manager.saveToPreferencesWithCompletionHandler(b)
     })
 }

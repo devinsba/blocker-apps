@@ -1,6 +1,7 @@
 # Packaging Blocker.app
 
-`build-app.sh` assembles `Blocker.app` containing the CLI (`Contents/MacOS/blocker`)
+`build-app.sh` assembles `Blocker.app` containing the menu-bar UI (main executable,
+`Contents/MacOS/blocker-ui`), the CLI (`Contents/MacOS/blocker`)
 and the content-filter system extension
 (`Contents/Library/SystemExtensions/dev.blocker.app.filter.systemextension`).
 The app must live in `/Applications` for the system extension to be activated.
@@ -38,7 +39,7 @@ packaging/build-app.sh \
   --out dist
 ```
 
-Signing is done inside-out (extension, then app). Info.plist and entitlement
+Signing is done inside-out (extension, CLI as `dev.blocker.cli`, then app). Info.plist and entitlement
 templates under `packaging/` contain `__TEAM_ID__` / `__VERSION__` placeholders
 that the script substitutes into copies; templates are never modified.
 
@@ -49,8 +50,24 @@ sudo ditto dist/Blocker.app /Applications/Blocker.app
 /Applications/Blocker.app/Contents/MacOS/blocker activate
 ```
 
+Launching Blocker.app starts the menu-bar UI (no Dock icon). The CLI at
+`Contents/MacOS/blocker` is what the LaunchDaemon and docs use.
+
 Approve the extension in System Settings > General > Login Items & Extensions
 (Network Extensions / Content Filters).
+
+## Optional: start the UI at login
+
+`launch-agent.plist` is a template for a LaunchAgent that starts the menu-bar UI
+at login. Install it manually (the build never does):
+
+```sh
+sudo cp packaging/launch-agent.plist /Library/LaunchAgents/dev.blocker.ui.plist
+sudo chown root:wheel /Library/LaunchAgents/dev.blocker.ui.plist
+launchctl bootstrap gui/$(id -u) /Library/LaunchAgents/dev.blocker.ui.plist
+```
+
+Remove with `launchctl bootout gui/$(id -u)/dev.blocker.ui` and delete the file.
 
 ## Local development without a paid profile
 

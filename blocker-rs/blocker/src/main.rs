@@ -14,6 +14,7 @@ use anyhow::{bail, Context, Result};
 use blocker_core::config::{Rule, ServerConfig};
 use blocker_core::engine::{normalize_app_id, Proto};
 use blocker_core::schedule::{parse_window, Schedule};
+use blocker_core::status::{DaemonInfo, SystemStatus};
 use blocker_core::{Config, FlowInfo, Store, Verdict, WeekTime};
 use clap::{Args, Parser, Subcommand};
 
@@ -62,7 +63,11 @@ enum Command {
         app: Option<String>,
     },
     /// Show rules, lists, the daemon and the content filter.
-    Status,
+    Status {
+        /// Print one machine-readable JSON object (for the menu-bar app).
+        #[arg(long)]
+        json: bool,
+    },
     /// List running apps and their bundle ids (to write app rules).
     Apps,
     /// Install the content filter extension and turn filtering on.
@@ -180,7 +185,11 @@ fn run(cli: Cli) -> Result<()> {
             Ok(())
         }
         Command::Check { host, app } => check(&store, &host, app.as_deref()),
-        Command::Status => status(&store),
+        Command::Status { json: true } => {
+            print_status_json();
+            Ok(())
+        }
+        Command::Status { json: false } => status(&store),
         Command::Apps => {
             let mut sys = sysinfo::System::new().context("reading the process table")?;
             let mut cache = apps::BundleIdCache::default();
@@ -403,6 +412,33 @@ fn status(store: &Store) -> Result<()> {
     Ok(())
 }
 
+fn print_status_json() {
+    let status = system_status();
+    match serde_json::to_string(&status) {
+        Ok(s) => println!("{s}"),
+        // Unreachable for these types, but never emit anything but JSON.
+        Err(e) => println!(
+            r#"{{"daemon":{{"installed":false,"running":false}},"filter":{{"extension":"unknown","error":{:?}}}}}"#,
+            e.to_string()
+        ),
+    }
+}
+
+fn system_status() -> SystemStatus {
+    let daemon = match launchd::status() {
+        Some(d) => DaemonInfo {
+            installed: true,
+            running: d.running,
+            pid: d.pid,
+        },
+        None => DaemonInfo::default(),
+    };
+    SystemStatus {
+        daemon,
+        filter: platform::filter_info(),
+    }
+}
+
 fn ago(unix: u64) -> String {
     if unix == 0 {
         return "never".into();
@@ -415,7 +451,50 @@ fn ago(unix: u64) -> String {
 
 #[cfg(target_os = "macos")]
 mod platform {
+    use anyhow::Result;
+    use blocker_core::status::{ExtensionState as CoreExtensionState, FilterInfo};
+
+    use crate::activation::FilterStatus;
     pub use crate::activation::{activate, deactivate};
+
+    pub fn filter_info() -> FilterInfo {
+        filter_info_from(crate::activation::status_quick())
+    }
+
+    /// Maps the system's answer onto the JSON contract.
+    pub fn filter_info_from(result: Result<FilterStatus>) -> FilterInfo {
+        match result {
+            Ok(s) => {
+                let list = s.extensions.as_deref();
+                let enabled_ext = list.and_then(|l| l.iter().find(|e| e.enabled));
+                let (extension, version) = match list {
+                    Some(_) if enabled_ext.is_some() => (
+                        CoreExtensionState::Installed,
+                        enabled_ext.map(|e| e.version.clone()),
+                    ),
+                    Some(l) if l.iter().any(|e| e.awaiting_approval) => {
+                        (CoreExtensionState::AwaitingApproval, None)
+                    }
+                    Some(_) => (CoreExtensionState::NotInstalled, None),
+                    None => (CoreExtensionState::Unknown, None),
+                };
+                FilterInfo {
+                    extension,
+                    version,
+                    configured: Some(s.configured),
+                    enabled: Some(s.enabled),
+                    error: None,
+                }
+            }
+            Err(e) => FilterInfo {
+                extension: CoreExtensionState::Unknown,
+                version: None,
+                configured: None,
+                enabled: None,
+                error: Some(format!("{e:#}")),
+            },
+        }
+    }
 
     pub fn print_filter_status() {
         match crate::activation::status() {
@@ -461,7 +540,101 @@ mod platform {
     pub fn deactivate() -> anyhow::Result<()> {
         activate()
     }
+    pub fn filter_info() -> blocker_core::status::FilterInfo {
+        blocker_core::status::FilterInfo {
+            error: Some("unsupported platform".into()),
+            ..Default::default()
+        }
+    }
     pub fn print_filter_status() {
         println!("Filter: unsupported platform");
+    }
+}
+
+#[cfg(test)]
+mod status_tests {
+    use super::*;
+    use blocker_core::status::FilterInfo;
+
+    #[test]
+    fn status_json_parses_back() {
+        let s = SystemStatus {
+            daemon: DaemonInfo {
+                installed: true,
+                running: true,
+                pid: Some(7),
+            },
+            filter: FilterInfo::default(),
+        };
+        let json = serde_json::to_string(&s).unwrap();
+        assert_eq!(serde_json::from_str::<SystemStatus>(&json).unwrap(), s);
+    }
+
+    #[cfg(target_os = "macos")]
+    mod mapping {
+        use crate::activation::{ExtensionState as Ext, FilterStatus};
+        use crate::platform::filter_info_from;
+        use blocker_core::status::ExtensionState as Core;
+
+        fn ext(enabled: bool, awaiting: bool) -> Ext {
+            Ext {
+                version: "1.2".into(),
+                enabled,
+                awaiting_approval: awaiting,
+                uninstalling: false,
+            }
+        }
+        fn fs(extensions: Option<Vec<Ext>>) -> anyhow::Result<FilterStatus> {
+            Ok(FilterStatus {
+                extensions,
+                configured: true,
+                enabled: false,
+            })
+        }
+
+        #[test]
+        fn installed() {
+            let f = filter_info_from(fs(Some(vec![ext(false, true), ext(true, false)])));
+            assert_eq!(f.extension, Core::Installed);
+            assert_eq!(f.version.as_deref(), Some("1.2"));
+            assert_eq!(
+                (f.configured, f.enabled, f.error),
+                (Some(true), Some(false), None)
+            );
+        }
+
+        #[test]
+        fn awaiting_approval() {
+            let f = filter_info_from(fs(Some(vec![ext(false, true)])));
+            assert_eq!(f.extension, Core::AwaitingApproval);
+            assert_eq!(f.version, None);
+        }
+
+        #[test]
+        fn not_installed() {
+            assert_eq!(
+                filter_info_from(fs(Some(vec![]))).extension,
+                Core::NotInstalled
+            );
+            assert_eq!(
+                filter_info_from(fs(Some(vec![ext(false, false)]))).extension,
+                Core::NotInstalled
+            );
+        }
+
+        #[test]
+        fn unknown() {
+            let f = filter_info_from(fs(None));
+            assert_eq!(f.extension, Core::Unknown);
+            assert_eq!(f.configured, Some(true));
+        }
+
+        #[test]
+        fn error() {
+            let f = filter_info_from(Err(anyhow::anyhow!("boom")));
+            assert_eq!(f.extension, Core::Unknown);
+            assert_eq!((f.configured, f.enabled), (None, None));
+            assert_eq!(f.error.as_deref(), Some("boom"));
+        }
     }
 }
