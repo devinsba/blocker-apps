@@ -147,6 +147,7 @@ fn classify_error(stderr: &str) -> AdminError {
 mod tests {
     use super::*;
 
+    #[cfg(unix)]
     const NASTY: &[&str] = &[
         "plain",
         "with space",
@@ -168,6 +169,7 @@ mod tests {
         "!history ~",
     ];
 
+    #[cfg(unix)]
     fn sh_run(cmd: &str) -> String {
         let out = Command::new("/bin/sh").arg("-c").arg(cmd).output().unwrap();
         assert!(out.status.success());
@@ -181,6 +183,7 @@ mod tests {
         assert_eq!(sh_quote("it's"), "'it'\\''s'");
     }
 
+    #[cfg(unix)]
     #[test]
     fn sh_quote_roundtrips_through_sh() {
         for a in NASTY {
@@ -195,6 +198,7 @@ mod tests {
         assert_eq!(&got[..NASTY.len()], NASTY);
     }
 
+    #[cfg(unix)]
     #[test]
     fn sh_quote_does_not_execute_injection() {
         let marker = std::env::temp_dir().join(format!("blocker-inj-{}", std::process::id()));

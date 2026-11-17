@@ -496,7 +496,6 @@ mod tests {
     #[cfg(unix)]
     #[test]
     fn enforce_terminates_process() {
-        use std::os::unix::process::ExitStatusExt;
         let dir = tempfile::tempdir().unwrap();
         let bin = dir.path().join("blockertestproc");
         std::fs::copy("/bin/sleep", &bin).unwrap();
@@ -518,7 +517,9 @@ mod tests {
             matches!(acted.as_slice(), [Action::Terminated(a)] if a.pid == child.id()),
             "{acted:?}"
         );
-        // A copied system binary may also be SIGKILLed by the OS, so only require a signal death.
-        assert!(status.signal().is_some(), "{status:?}");
+        // The OS may SIGKILL a copied system binary, and some `sleep`
+        // implementations catch SIGTERM and exit 1, so only require that it
+        // did not finish normally.
+        assert!(!status.success(), "{status:?}");
     }
 }
