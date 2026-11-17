@@ -1,191 +1,69 @@
 # blocker-apps
 
-> **macOS blocker (Rust):** [`blocker-rs/`](blocker-rs/README.md) is a content
-> filter system extension, CLI/daemon, and central signed-blocklist server.
-> It blocks websites and apps while coexisting with Tailscale, Twingate and
-> other VPNs, and scales to millions of blocked domains.
+Website and app blocker for desktop and mobile. It coexists with Tailscale,
+Twingate and other VPNs, scales to millions of blocked domains, and gets signed
+blocklists from a central server.
 
-Multi-platform app skeleton:
+The blocking logic is written once, in Rust (`crates/blocker-core`), and used
+everywhere: directly by the Rust desktop apps, and through a C ABI
+(`crates/blocker-ffi`, header `blocker.h`) by the Swift and Kotlin mobile apps.
 
-- `mobile/flutter_app`: Flutter app skeleton for iOS, Android, and iPadOS.
-- `desktop/flutter_app`: Flutter app skeleton for macOS and Windows.
-- `shared/blocker_shared`: Shared Dart module for common code used by both apps.
+```
+                         crates/blocker-core  (Rust: rules, schedules, FST lists, SNI, guard, engine)
+                           │                       │
+              Rust crate dep│                       │ crates/blocker-ffi  →  blocker.h  (C ABI, staticlib)
+                           ▼                       ▼
+   desktop/ (Rust: macOS, Linux, Windows)     mobile/ios (Swift: `import BlockerFFI` → BlockerKit)
+     blocker-cli, blocker-ui,                 mobile/android (Kotlin → C JNI shim → blocker.h)
+     blocker-filter (macOS NE extension)
+                                       crates/blocker-server  (builds and serves signed lists)
+```
 
-## Quick Start
+## Layout
 
-### macOS App
+| Path | What |
+|---|---|
+| `crates/blocker-core` | Platform-independent blocking decisions. Pure Rust, unit-tested. |
+| `crates/blocker-ffi` | C ABI over the core: `include/blocker.h`, `include/module.modulemap`. Builds `libblocker_ffi.a`. |
+| `crates/blocker-server` | Central list server: `keygen`, `build` (fetch → FST → signed manifest), `serve`. |
+| `desktop/blocker-cli` | `blocker` CLI and root daemon. |
+| `desktop/blocker-ui` | Tray / menu-bar app built with Rune. |
+| `desktop/blocker-filter` | macOS `NEFilterDataProvider` system extension (macOS-only; a stub elsewhere). |
+| `desktop/packaging/macos` | Builds, signs and notarizes `Blocker.app`. |
+| `mobile/ios` | iOS / iPadOS app in Swift (SwiftUI), `BlockerKit` Swift package, NE extensions. |
+| `mobile/android` | Android app in Kotlin (Compose), `:blocker-core` JNI module, `VpnService`. |
+| `scripts/` | Cross-compilation and test helpers. |
+| `research/` | Platform research on blocking approaches. Read before platform work. |
 
-The easiest way to run the macOS app is using the utility script:
+## Platform status
+
+| Platform | Language | Domain blocking | App blocking |
+|---|---|---|---|
+| macOS | Rust | Content filter system extension (works alongside VPNs) | Closes blocked apps |
+| Linux | Rust | Not yet (CLI, list updates and tray UI run) | Kills blocked processes by name |
+| Windows | Rust | Not yet (CLI, list updates and tray UI run) | Kills blocked processes by name |
+| iOS / iPadOS | Swift | `NEFilterDataProvider` (supervised) / packet tunnel DNS: skeletons | Screen Time: stubbed |
+| Android | Kotlin | `VpnService` DNS filtering: skeleton | Not yet |
+
+## Building
+
+Rust workspace (all desktop apps, the core, the FFI library and the server):
 
 ```bash
-# Run the app (validates dependencies and initializes project)
-./run-macos.sh
-
-# Clean build before running
-./run-macos.sh --clean
-
-# Build release version
-./run-macos.sh --build
+cargo build --workspace
 ```
-
-The script will automatically:
-- ✅ Check Flutter installation
-- ✅ Validate macOS toolchain
-- ✅ Initialize macOS project if needed
-- ✅ Install all dependencies
-- ✅ Link the shared module
-- ✅ Run the app
-
-### Manual Setup
-
-If you prefer to run manually:
-
-#### Desktop Flutter app
-
-Path: `desktop/flutter_app`
-
-Next step (when Flutter SDK is available):
-
-> ⚠️ `flutter create --overwrite` may overwrite existing files in this directory.
 
 ```bash
-cd desktop/flutter_app
-flutter create --platforms=macos,windows --overwrite .
-flutter pub get
-flutter run -d macos
+cargo test --workspace
 ```
 
-#### Mobile Flutter app
-
-Path: `mobile/flutter_app`
-
-Next step (when Flutter SDK is available):
-
-> ⚠️ `flutter create --overwrite` may overwrite existing files in this directory.
+C ABI smoke test (links `blocker.h` + `libblocker_ffi.a` from plain C):
 
 ```bash
-cd mobile/flutter_app
-flutter create --platforms=android,ios --overwrite .
-flutter pub get
-flutter run
+scripts/test-ffi-c.sh
 ```
 
-## Features
-
-The blocker app allows you to:
-
-- 🚫 Block specific applications by bundle ID
-- 🌐 Block websites and domains (supports wildcards like `*.youtube.com`)
-- ⏰ Schedule blocking:
-  - Always blocked
-  - Time-based (e.g., 9 AM - 5 PM)
-  - Day and time-based (e.g., weekdays 9 AM - 5 PM)
-- 💾 Persistent storage of blocking rules
-- 🎨 Clean, native-looking UI
-
-## Architecture
-
-```
-┌─────────────────────────────────────┐
-│   Flutter UI (macOS/Windows/Mobile) │
-│   - Home screen                     │
-│   - Add rule screen                 │
-└──────────────┬──────────────────────┘
-               │
-               ▼
-┌─────────────────────────────────────┐
-│   Shared Module (blocker_shared)    │
-│   - Block rules (models)            │
-│   - Blocking logic (service)        │
-│   - Storage (persistence)           │
-└──────────────┬──────────────────────┘
-               │
-               ▼
-┌─────────────────────────────────────┐
-│   Platform-Specific Implementation  │
-│   - macOS: Network Extensions       │
-│   - iOS: Screen Time + VPN          │
-│   - Android: VPN Service            │
-└─────────────────────────────────────┘
-```
-
-**Key Design Principle**: All blocking logic lives in the shared module. Platform-specific code only handles enforcement.
-
-## Native macOS Blocking
-
-For full macOS blocking functionality (apps + domains), you'll need to set up Network Extensions. See [`desktop/MACOS_SETUP.md`](desktop/MACOS_SETUP.md) for detailed instructions.
-
-### What's Required
-
-1. **Apple Developer Account** (for Network Extension entitlements)
-2. **Entitlement Request** (~1-2 weeks approval time)
-3. **Xcode Configuration** (capabilities, targets, code signing)
-4. **Native Swift Code** (platform channels, Network Extension)
-
-### Current Status
-
-- ✅ Shared blocking logic implemented
-- ✅ macOS UI implemented
-- ✅ Platform channel interface defined
-- ⏳ Native Swift implementation (documented, needs setup)
-- ⏳ Network Extension targets (documented, needs creation)
-
-The app will run and allow you to manage blocking rules through the UI, but actual enforcement requires completing the native setup.
-
-## Project Structure
-
-```
-blocker-apps/
-├── desktop/
-│   ├── flutter_app/          # macOS/Windows app
-│   │   ├── lib/
-│   │   │   ├── screens/       # UI screens
-│   │   │   ├── services/      # Platform integration
-│   │   │   └── main.dart      # App entry point
-│   │   └── macos/             # Native macOS code (after init)
-│   └── MACOS_SETUP.md         # macOS setup guide
-├── mobile/
-│   └── flutter_app/           # iOS/Android app
-├── shared/
-│   └── blocker_shared/        # Shared logic
-│       ├── lib/
-│       │   ├── src/
-│       │   │   ├── models/    # Data models
-│       │   │   └── services/  # Business logic
-│       │   └── blocker_shared.dart
-│       └── pubspec.yaml
-├── research/                  # Platform research docs
-└── run-macos.sh              # Utility script
-```
-
-## Development Notes
-
-### Adding New Blocking Rules
-
-All rule logic is in the shared module:
-- **Models**: `shared/blocker_shared/lib/src/models/`
-- **Service**: `shared/blocker_shared/lib/src/services/blocking_service.dart`
-
-To add new rule types:
-1. Update the model (e.g., add new `ScheduleType`)
-2. Update `BlockingService` logic
-3. Update UI to support the new type
-4. Platform-specific code automatically picks up changes via the platform channel
-
-### Testing
-
-```bash
-# Run Flutter tests
-cd desktop/flutter_app
-flutter test
-
-# Run shared module tests
-cd shared/blocker_shared
-flutter test
-```
-
-## Resources
-
-- [Flutter Documentation](https://flutter.dev/docs)
-- [macOS Network Extensions](https://developer.apple.com/documentation/networkextension)
-- [Research Documentation](research/cross-platform-summary.md)
+macOS app bundle: see [desktop/packaging/macos/README.md](desktop/packaging/macos/README.md).
+Desktop architecture and usage: [desktop/README.md](desktop/README.md).
+iOS / iPadOS: [mobile/ios/README.md](mobile/ios/README.md).
+Android: [mobile/android/README.md](mobile/android/README.md).

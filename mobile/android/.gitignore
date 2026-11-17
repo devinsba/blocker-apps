@@ -1,0 +1,18 @@
+# Gradle / Android Studio
+build/
+.gradle/
+.kotlin/
+.cxx/
+.externalNativeBuild/
+local.properties
+*.iml
+.idea/
+captures/
+*.apk
+*.aab
+
+# Gradle wrapper (gradlew, gradlew.bat, gradle/wrapper/*) is checked in.
+!gradle/wrapper/gradle-wrapper.properties
+
+# Per-ABI Rust static libraries produced by scripts/build-android.sh
+blocker-core/src/main/jniLibs-static/

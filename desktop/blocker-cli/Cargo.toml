@@ -1,0 +1,33 @@
+[package]
+name = "blocker"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+anyhow = "1.0.104"
+blocker-core.workspace = true
+chrono = "0.4.45"
+clap = { version = "4", features = ["derive", "env"] }
+env_logger = "0.11.11"
+log = "0.4"
+serde_json = "1.0.154"
+sysinfo = "0.40.3"
+ureq = "2"
+
+[target.'cfg(unix)'.dependencies]
+libc = "0.2.191"
+
+# Content filter activation (NetworkExtension / SystemExtensions), the
+# LaunchDaemon plist and app bundle ids are macOS-only.
+[target.'cfg(target_os = "macos")'.dependencies]
+block2 = "0.6"
+dispatch2 = "0.3"
+objc2 = "0.6"
+objc2-foundation = "0.3"
+objc2-network-extension = "0.3"
+objc2-system-extensions = "0.3"
+plist = "1.10.3"
+
+[dev-dependencies]
+tempfile = "3.27.0"

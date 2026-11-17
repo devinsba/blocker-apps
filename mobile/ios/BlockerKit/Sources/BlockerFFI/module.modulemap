@@ -1,0 +1,11 @@
+// Local (host) build of the BlockerFFI module, used when Package.swift is in
+// local mode (BLOCKER_FFI_LOCAL=1, or no BlockerFFI.xcframework yet).
+//
+// The header is the canonical one from crates/blocker-ffi; paths in a module
+// map are relative to this file. There is deliberately no `link` directive:
+// Package.swift links target/release/libblocker_ffi.a by absolute path so the
+// static library is used even though cargo also leaves a .dylib next to it.
+module BlockerFFI {
+    header "../../../../../crates/blocker-ffi/include/blocker.h"
+    export *
+}

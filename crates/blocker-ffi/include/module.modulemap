@@ -1,0 +1,5 @@
+module BlockerFFI {
+    header "blocker.h"
+    link "blocker_ffi"
+    export *
+}

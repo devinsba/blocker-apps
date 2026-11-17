@@ -1,0 +1,22 @@
+[package]
+name = "blocker-ffi"
+description = "C ABI over blocker-core, consumed by the Swift (iOS/iPadOS) and Kotlin (Android) apps"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+autoexamples = false
+
+[lib]
+# staticlib: linked into the iOS XCFramework and the Android JNI shim.
+# cdylib: for desktop experiments / dlopen. rlib: for Rust tests.
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[dependencies]
+blocker-core.workspace = true
+serde_json = "1"
+toml = "0.8"
+
+# smoke.c is C, not a Rust example; scripts/test-ffi-c.sh builds it.
+[package.metadata]
+c-examples = ["examples/smoke.c"]
