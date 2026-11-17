@@ -82,6 +82,27 @@ Enforcement follows `research/ios-blocking-approaches.md` and
 | Domains, consumer devices | `BlockerTunnel` (NEPacketTunnelProvider): routes only DNS into the tunnel and decides each query with `BlockerEngine.checkHost` | **Skeleton**: queries parsed and decided; answering/forwarding is TODO |
 | Domains, supervised devices | `BlockerFilter` (NEFilterDataProvider): `handleNewFlow` → `engine.decide`; on `.peek`, peeks outbound bytes and decides on the TLS SNI / HTTP Host via `BlockerEngine.peekHost` | Implemented, untested on device |
 
+**Choosing the website-blocking method.** The content filter is optional and
+used only where iOS allows it (supervised devices, or an MDM-installed filter
+profile). iOS has no public "is supervised" API, so
+`ContentFilterSupport` (in BlockerKit, unit-tested) combines signals:
+
+1. a filter configuration is already installed (`NEFilterManager` has a
+   `providerConfiguration`: pushed by an MDM profile, or saved earlier by the app);
+2. managed app configuration from the MDM (`com.apple.configuration.managed`)
+   has `supervised = true` (or `false`). Set it per device in your MDM's
+   app configuration (Fleet, Jamf, Intune, ...);
+3. the outcome of the last attempt to save a filter configuration on this iOS
+   version. `NEFilterErrorDomain` invalid / disabled / permission-denied means
+   "not supervised"; that is retried after an OS update or when the MDM flag appears.
+
+Result: `.available` → the "Block websites" switch drives the content filter,
+and the DNS tunnel is turned off because the filter covers it without the VPN slot;
+`.unknown` → the DNS tunnel is used and Protection offers "Use Content
+Filter (supervised devices)", which tries it once; `.unavailable` → the DNS tunnel only.
+The logic lives in `NetworkProtection` (`Blocker/ProtectionView.swift`) and
+re-evaluates when managed configuration changes.
+
 **Config.** Everything reads the App Group container
 (`group.dev.blocker.shared`, `Blocker/` subdirectory):
 
@@ -111,7 +132,8 @@ safe to share across threads.
 iPhone): Rules (with "Active" badges from `activeRules`), Add Rule (domains
 normalized live with `normalizeDomain`, optional weekly window, lock),
 Check a Host (verdict now or at a chosen day/time), Protection (Screen Time
-stub, tunnel and filter toggles via `NETunnelProviderManager` / `NEFilterManager`).
+stub, and one "Block websites" switch that uses the content filter or the DNS tunnel
+as described above, via `NEFilterManager` / `NETunnelProviderManager`).
 
 ## Stubbed / not done
 

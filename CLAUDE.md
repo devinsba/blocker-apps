@@ -80,7 +80,11 @@ and XcodeGen; the Android app needs the Android SDK, NDK (`ANDROID_NDK_HOME`)
   `target/release/libblocker_ffi.a`. The Xcode project is generated from
   `project.yml` with XcodeGen and not committed. Tests use swift-testing.
   The app stores rules as `rules.json` in the App Group and renders `config.toml`
-  from it; bundle ids / App Group (`dev.blocker.ios`, `group.dev.blocker.shared`) are placeholders.
+  from it. Website blocking uses the NEFilter content filter only when
+  `ContentFilterSupport` (BlockerKit) says the device supports it (installed
+  filter config, MDM managed-config `supervised` flag, or a successful save on
+  this OS version); otherwise the DNS tunnel. The filter is never required.
+  Bundle ids / App Group (`dev.blocker.ios`, `group.dev.blocker.shared`) are placeholders.
 - Android: natives are `@JvmStatic external` on `dev.blocker.core.NativeBridge`
   (C shim: `blocker-core/src/main/cpp/blocker_jni.c`); verdicts cross JNI as a
   3-string array. `scripts/build-android.sh` drops per-ABI `libblocker_ffi.a`
