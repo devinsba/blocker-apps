@@ -35,7 +35,6 @@ final class NetworkProtection: ObservableObject {
             try await manager.loadFromPreferences()
             let config = manager.providerConfiguration ?? NEFilterProviderConfiguration()
             config.filterSockets = true
-            config.filterPackets = false
             // The data provider's sandbox may not read the App Group, so the
             // config text travels with the filter configuration too.
             config.vendorConfiguration = [SharedConfig.vendorConfigKey: SharedConfig.readConfigTOML() ?? ""]

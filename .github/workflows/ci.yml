@@ -80,11 +80,10 @@ jobs:
         with:
           distribution: temurin
           java-version: "17"
-      - uses: android-actions/setup-android@v3
-      - name: Install NDK
-        run: sdkmanager --install "ndk;27.2.12479018"
+      - name: Install NDK (runner has the Android SDK preinstalled)
+        run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --install "ndk;27.2.12479018" > /dev/null
       - name: Build Rust core for Android
-        run: ANDROID_NDK_HOME=$ANDROID_SDK_ROOT/ndk/27.2.12479018 ABIS="arm64-v8a x86_64" scripts/build-android.sh
+        run: ANDROID_NDK_HOME=$ANDROID_HOME/ndk/27.2.12479018 ABIS="arm64-v8a x86_64" scripts/build-android.sh
       - name: Build app and run unit tests
         working-directory: mobile/android
         run: ./gradlew --no-daemon -Pblocker.abis=arm64-v8a,x86_64 :app:assembleDebug test
