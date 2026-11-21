@@ -1,0 +1,38 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/blocker-core",
+    "crates/blocker-ffi",
+    "crates/blocker-server",
+    "desktop/blocker-cli",
+    "desktop/blocker-filter",
+    "desktop/blocker-ui",
+]
+default-members = [
+    "crates/blocker-core",
+    "crates/blocker-ffi",
+    "crates/blocker-server",
+    "desktop/blocker-cli",
+    "desktop/blocker-ui",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+
+[workspace.dependencies]
+blocker-core = { path = "crates/blocker-core" }
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+
+# Rune (blocker-ui) ships patched builds of these crates; Cargo doesn't inherit
+# patches from a dependency, so apps that build Rune repeat its table.
+[patch.crates-io]
+winit = { git = "https://github.com/anomalyco/rune", rev = "631e8a67cb3c40225efa3f6c4f57b80e7b18f190" }
+parley_engine = { git = "https://github.com/anomalyco/rune", rev = "631e8a67cb3c40225efa3f6c4f57b80e7b18f190" }
+wgpu-hal = { git = "https://github.com/anomalyco/rune", rev = "631e8a67cb3c40225efa3f6c4f57b80e7b18f190" }
+accesskit_windows = { git = "https://github.com/anomalyco/rune", rev = "631e8a67cb3c40225efa3f6c4f57b80e7b18f190" }
+accesskit_macos = { git = "https://github.com/anomalyco/rune", rev = "631e8a67cb3c40225efa3f6c4f57b80e7b18f190" }

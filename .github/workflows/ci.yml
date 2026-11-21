@@ -1,0 +1,89 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  rust:
+    name: Rust (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+      - uses: Swatinem/rust-cache@v2
+      - name: Linux system libraries for the tray UI
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libdbus-1-dev pkg-config libxkbcommon-dev libwayland-dev
+      - run: cargo build --workspace --all-targets
+      - run: cargo test --workspace
+      - run: cargo clippy --workspace --all-targets -- -D warnings
+
+  ffi-c:
+    name: C ABI smoke test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - run: scripts/test-ffi-c.sh
+
+  ios-kit:
+    name: BlockerKit (Swift, macOS host)
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo build -p blocker-ffi --release
+      - run: swift test
+        working-directory: mobile/ios/BlockerKit
+        env:
+          BLOCKER_FFI_LOCAL: "1"
+
+  ios-app:
+    name: iOS/iPadOS app (simulator build)
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - run: brew install xcodegen
+      - run: scripts/build-ios-xcframework.sh
+      - run: xcodegen generate
+        working-directory: mobile/ios
+      - name: Build all targets for the simulator
+        working-directory: mobile/ios
+        run: >
+          xcodebuild build -project Blocker.xcodeproj -scheme Blocker
+          -destination 'generic/platform=iOS Simulator'
+          CODE_SIGNING_ALLOWED=NO
+
+  android-app:
+    name: Android app (assembleDebug + unit tests)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - name: Install NDK (runner has the Android SDK preinstalled)
+        run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --install "ndk;27.2.12479018" > /dev/null
+      - name: Build Rust core for Android
+        run: ANDROID_NDK_HOME=$ANDROID_HOME/ndk/27.2.12479018 ABIS="arm64-v8a x86_64" scripts/build-android.sh
+      - name: Build app and run unit tests
+        working-directory: mobile/android
+        run: ./gradlew --no-daemon -Pblocker.abis=arm64-v8a,x86_64 :app:assembleDebug test
