@@ -22,3 +22,11 @@ local.properties
 # Apple signing (keep outside the repo; see desktop/packaging/macos/README.md)
 *.provisionprofile
 *.p12
+
+# Claude Code: commit skills, not local agent state
+/.claude/worktrees/
+/.claude/autoharness/
+/.claude/settings.local.json
+/.claude/skills/**/.ledger.jsonl*
+/.claude/skills/**/.sidecar.json
+/.claude/skills/**/references/evidence-*.md
