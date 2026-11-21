@@ -18,3 +18,7 @@ DerivedData/
 .gradle/
 local.properties
 *.jks
+
+# Apple signing (keep outside the repo; see desktop/packaging/macos/README.md)
+*.provisionprofile
+*.p12
