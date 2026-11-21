@@ -90,8 +90,10 @@ and XcodeGen; the Android app needs the Android SDK, NDK (`ANDROID_NDK_HOME`)
   into `blocker-core/src/main/jniLibs-static/<abi>/` (gitignored).
 - Mobile time zones are resolved on the platform side: apps pass `WeekTime`
   (day, minute) explicitly rather than letting Rust read the clock.
-- Neither mobile build has been run on a real SDK yet; dependency versions in
-  `mobile/android/gradle/libs.versions.toml` were pinned without resolving.
+- The iOS app has not been built with a real SDK yet. The Android app builds
+  (debug and release) with Gradle 9.9.2 and AGP 9.5.2, which compiles Kotlin
+  itself (no `org.jetbrains.kotlin.android` plugin). Don't run Gradle on
+  GraalVM: its `jlink` fails AGP's `JdkImageTransform`; use Temurin or Corretto.
 
 ## Research
 
