@@ -35,13 +35,12 @@ visit, and optionally enforce SafeSearch.
 _Avoid_: Policy, configuration profile (as the domain term)
 
 **SafeSearch**:
-An option that forces safe results in search engines and YouTube in covered
-browsers, and blocks browsers that are not covered.
+An option of the browser profile that forces safe results in search engines and
+YouTube in covered browsers, and blocks browsers that are not covered.
 _Avoid_: Safe mode, restricted mode (as the general term)
 
 **Covered browser**:
-A browser that Blocker can configure: through the browser profile, or for
-Safari, through Screen Time's web content filter.
+A browser that the browser profile can configure.
 _Avoid_: Managed browser, supported browser
 
 **Setup wizard**:
