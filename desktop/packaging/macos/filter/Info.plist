@@ -5,9 +5,9 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleExecutable</key>
-	<string>dev.blocker.app.filter</string>
+	<string>com.briandevins.blocker.filter</string>
 	<key>CFBundleIdentifier</key>
-	<string>dev.blocker.app.filter</string>
+	<string>com.briandevins.blocker.filter</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
@@ -30,7 +30,7 @@
 			<string>BlockerFilterDataProvider</string>
 		</dict>
 		<key>NEMachServiceName</key>
-		<string>__TEAM_ID__.dev.blocker.app.filter</string>
+		<string>group.com.briandevins.blocker.filter</string>
 	</dict>
 </dict>
 </plist>

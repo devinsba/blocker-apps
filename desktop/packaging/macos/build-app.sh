@@ -73,14 +73,14 @@ else
 fi
 
 APP="$OUT/Blocker.app"
-EXT="$APP/Contents/Library/SystemExtensions/dev.blocker.app.filter.systemextension"
+EXT="$APP/Contents/Library/SystemExtensions/com.briandevins.blocker.filter.systemextension"
 rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$EXT/Contents/MacOS"
 
 echo "==> Assembling bundle"
 cp "$TARGET_DIR/blocker-ui" "$APP/Contents/MacOS/blocker-ui"   # main executable (menu-bar UI)
 cp "$TARGET_DIR/blocker" "$APP/Contents/MacOS/blocker"         # CLI
-cp "$TARGET_DIR/blocker-filter" "$EXT/Contents/MacOS/dev.blocker.app.filter"
+cp "$TARGET_DIR/blocker-filter" "$EXT/Contents/MacOS/com.briandevins.blocker.filter"
 
 subst() { # subst <template> <dest>
   sed -e "s/__TEAM_ID__/$TEAM_ID/g" -e "s/__VERSION__/$VERSION/g" "$1" > "$2"

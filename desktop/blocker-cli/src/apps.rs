@@ -397,7 +397,7 @@ mod tests {
         assert!(!should_close(&near, &b, &g, 10, Some(2)));
 
         let all = blocked(
-            &["com.tailscale.ipn.macos", "dev.blocker.app"],
+            &["com.tailscale.ipn.macos", "com.briandevins.blocker"],
             &["Tailscale", "tailscaled", "Discord"],
         );
         let ts = app(
@@ -413,7 +413,7 @@ mod tests {
             602,
             "blocker",
             "/Applications/Blocker.app/Contents/MacOS/blocker",
-            Some("dev.blocker.app"),
+            Some("com.briandevins.blocker"),
         );
         assert!(!should_close(&own, &all, &g, 10, Some(2)));
 

@@ -28,7 +28,7 @@ use objc2_system_extensions::{
     OSSystemExtensionRequest, OSSystemExtensionRequestDelegate, OSSystemExtensionRequestResult,
 };
 
-pub const FILTER_BUNDLE_ID: &str = "dev.blocker.app.filter";
+pub const FILTER_BUNDLE_ID: &str = "com.briandevins.blocker.filter";
 const DESCRIPTION: &str = "Blocker";
 
 /// How long to wait for the user to approve the extension before giving up.

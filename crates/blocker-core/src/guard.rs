@@ -59,7 +59,8 @@ pub const PROTECTED_APPS: &[&str] = &[
     "com.tailscale.",
     "tailscaled",
     "com.twingate.",
-    "dev.blocker.",
+    "com.briandevins.blocker",
+    "com.briandevins.blocker.",
     "com.apple.mDNSResponder",
     "com.apple.networkd",
     "com.apple.nesessionmanager",
@@ -276,7 +277,8 @@ mod tests {
         assert!(g.protects_app("com.tailscale.ipn.macos"));
         assert!(g.protects_app("tailscaled"));
         assert!(g.protects_app("com.twingate.macos"));
-        assert!(g.protects_app("dev.blocker.app"));
+        assert!(g.protects_app("com.briandevins.blocker"));
+        assert!(g.protects_app("com.briandevins.blocker.filter"));
         assert!(g.protects_app("com.apple.mDNSResponder"));
         assert!(g.protects_app("com.apple.trustd"));
         assert!(!g.protects_app("io.tailscalex"));
