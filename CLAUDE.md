@@ -29,7 +29,6 @@ scripts/
   test-ffi-c.sh              build libblocker_ffi.a and link examples/smoke.c
   build-ios-xcframework.sh   mobile/ios/Frameworks/BlockerFFI.xcframework
   build-android.sh           per-ABI libblocker_ffi.a for the NDK build
-research/                    platform research (see below)
 ```
 
 ## Rules of the road
@@ -96,12 +95,22 @@ and XcodeGen; the Android app needs the Android SDK, NDK (`ANDROID_NDK_HOME`)
 
 ## Research
 
-`research/` holds background on blocking approaches. Consult it before
+Research lives on unmerged `research/<topic>` branches, never on `main` or
+feature branches: one findings file per branch at `research/<topic>.md`. Read
+one with `git fetch origin && git show origin/research/<topic>:research/<topic>.md`,
+and list them with `git branch -r --list 'origin/research/*'`. New research
+goes on a new branch (push it, open no PR). Consult research before
 implementing blocking features, making platform architecture decisions, or
 answering feasibility questions:
 
-- `research/cross-platform-summary.md` – comparison and recommendations
-- `research/ios-blocking-approaches.md` – Screen Time, NEFilter, packet tunnel
-- `research/android-blocking-approaches.md` – VpnService, accessibility, usage stats
-- `research/macos-non-vpn-blocking.md` – why the macOS filter coexists with VPNs
-- `research/fleet-mdm-report.md` – Fleet / MDM deployment
+- `research/cross-platform-summary` – comparison and recommendations
+- `research/ios-blocking-approaches` – Screen Time, NEFilter, packet tunnel
+- `research/android-blocking-approaches` – VpnService, accessibility, usage stats
+- `research/macos-non-vpn-blocking` – why the macOS filter coexists with VPNs
+- `research/fleet-mdm-report` – Fleet / MDM deployment
+- `research/nefilter-udp-and-exclusions` – UDP data peeks, no Apple app exclusions since macOS 11.2
+- `research/pkg-daemon-sparkle` – `.pkg` install, out-of-bundle daemon, Sparkle updates
+- `research/chromium-profile-policies` – SafeSearch and ECH policies via a user-installed profile
+- `research/firefox-ech-safesearch-policy` – Firefox ECH lock, no SafeSearch policy
+- `research/screen-time-safesearch` – Screen Time and Safari SafeSearch
+- `research/blocklist-licences` – adult, gambling and bypass lists and their licences

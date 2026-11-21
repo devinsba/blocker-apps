@@ -110,7 +110,7 @@ Times are always computed in Kotlin (`WeekTime.now()`, device time zone; day
   applied. Android allows one VPN at a time and an allow- *or* deny-list per
   tunnel, so this needs either a full-tunnel firewall keyed on
   `getConnectionOwnerUid`, or UsageStatsManager / AccessibilityService plus a
-  blocking screen (see `research/android-blocking-approaches.md`).
+  blocking screen (see the `research/android-blocking-approaches` branch).
 - No editing or deleting rules, no `locked`-rule enforcement in the UI, and no
   category list downloads (`[server]` / manifest sync) yet.
 - Google Play only allows `VpnService` when a VPN is the app's core function;

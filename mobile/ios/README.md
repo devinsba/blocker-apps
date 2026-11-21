@@ -73,8 +73,8 @@ Apple platforms, same as `scripts/test-ffi-c.sh`).
 
 ## Architecture
 
-Enforcement follows `research/ios-blocking-approaches.md` and
-`research/cross-platform-summary.md`:
+Enforcement follows the `research/ios-blocking-approaches` and
+`research/cross-platform-summary` branches:
 
 | What | How | Status |
 |---|---|---|

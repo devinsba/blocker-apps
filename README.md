@@ -33,7 +33,7 @@ everywhere: directly by the Rust desktop apps, and through a C ABI
 | `mobile/ios` | iOS / iPadOS app in Swift (SwiftUI), `BlockerKit` Swift package, NE extensions. |
 | `mobile/android` | Android app in Kotlin (Compose), `:blocker-core` JNI module, `VpnService`. |
 | `scripts/` | Cross-compilation and test helpers. |
-| `research/` | Platform research on blocking approaches. Read before platform work. |
+| `research/*` branches | Platform research on blocking approaches, one unmerged branch per topic (see CLAUDE.md). Read before platform work. |
 
 ## Platform status
 

@@ -154,7 +154,7 @@ class BlockerVpnService : VpnService() {
      * a deny-list of apps per tunnel, not both, and one VPN at a time, so app
      * blocking cannot simply be layered on this DNS-only tunnel.
      *
-     * TODO(apps): options, see research/android-blocking-approaches.md:
+     * TODO(apps): options, see the research/android-blocking-approaches branch:
      *   1. Full-tunnel mode: route 0.0.0.0/0 + ::/0 and drop packets whose owner
      *      (ConnectivityManager.getConnectionOwnerUid, API 29+) maps to a package in
      *      engine.blockedApps().bundleIds; needs a userspace TCP/IP stack to forward
