@@ -116,3 +116,17 @@ answering feasibility questions:
 - `research/firefox-ech-safesearch-policy` – Firefox ECH lock, no SafeSearch policy
 - `research/screen-time-safesearch` – Screen Time and Safari SafeSearch
 - `research/blocklist-licences` – adult, gambling and bypass lists and their licences
+
+## Agent skills
+
+### Issue tracker
+
+GitHub Issues on `devinsba/blocker-apps` via the `gh` CLI. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+The five default labels: `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: root `GLOSSARY.md` plus `docs/adr/`. See `docs/agents/domain.md`.
